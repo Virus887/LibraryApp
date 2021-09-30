@@ -1,4 +1,4 @@
-﻿using LibraryAPI.Models.DTO;
+﻿using LibraryAPI.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

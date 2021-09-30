@@ -1,5 +1,5 @@
 ﻿using System;
-using LibraryAPI.Models.POCO;
+using LibraryAPI.Models.POCOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
@@ -45,7 +45,7 @@ namespace LibraryAPI.Database
 
             modelBuilder.Entity<BookAuthorPOCO>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => new { e.BookId, e.AuthorId});
 
                 entity.ToTable("BookAuthor");
 
@@ -64,7 +64,7 @@ namespace LibraryAPI.Database
 
             modelBuilder.Entity<StatusHistoryPOCO>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.Id);
 
                 entity.ToTable("StatusHistory");
 

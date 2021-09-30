@@ -1,7 +1,7 @@
 ﻿using LibraryAPI.Enums;
 using System;
 
-namespace LibraryAPI.Models.DTO
+namespace LibraryAPI.Models.DTOs
 {
     public class BookStatus
     {

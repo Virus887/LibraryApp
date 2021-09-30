@@ -1,5 +1,6 @@
 ﻿using LibraryAPI.Database.Repositories.Interfaces;
-using LibraryAPI.Models.DTO;
+using LibraryAPI.Models.DTOs;
+using LibraryAPI.Models.POCOs;
 using LibraryAPI.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,7 @@ namespace LibraryAPI.Services.Implementations
         }
 
 
-
+        //DONE
         public IEnumerable<BookStatus> GetBookStatuses(Guid bookId)
         {
             var statusHistory = bookRepository.GetStatusHistoryByBookId(bookId).OrderBy(x => x.ModifiedDate);
@@ -50,25 +51,58 @@ namespace LibraryAPI.Services.Implementations
                         Id=status.Id,
                         BookId = status.BookId,
                         ModifiedDate = status.ModifiedDate,
-                        Status = status.Status switch
-                        {
-                            "InStock" => Enums.Statuses.InStock,
-                            "Borrowed" => Enums.Statuses.Borrowed,
-                            "Sold" => Enums.Statuses.Sold,
-                            "Missing" => Enums.Statuses.Missing,
-                            _ => Enums.Statuses.Missing
-                        }
+                        Status = Enum.Parse<Enums.Statuses>(status.Status)
                     });
             }
 
             return statuses.ToList();
         }
 
-        public int InsertBook(InsertBookDto insertBookDto)
+
+        //Możr najpierw dodać książkę, później status, a później w książce ustawić status guid?
+        public async Task<Guid> InsertBook(InsertBookDto insertBookDto)
         {
-            throw new NotImplementedException();
+            //create new book
+
+            BookPOCO newBook = new BookPOCO
+            {
+                Id = Guid.NewGuid(),
+                Title = insertBookDto.Title,
+                Language = insertBookDto.Language,
+                PublicationDate = insertBookDto.PublicationDate ?? null,
+                PageNumber = null,
+                CurrentStatusId = Guid.NewGuid(),
+                Genre = insertBookDto.Genre.ToString() ?? null
+            };
+
+            Guid newBookId = bookRepository.InsertBook(newBook).Result.Id;
+
+            //Assign new status to book
+            StatusHistoryPOCO newStatusHistory = new StatusHistoryPOCO
+            {
+                Id = newBook.CurrentStatusId ?? new Guid(),
+                BookId = newBookId,
+                Status = "InStock",
+                //Warning: if publication date is null, we assign DateTime.MinValue
+                ModifiedDate = newBook.PublicationDate ?? DateTime.MinValue,
+            };
+
+            var newBookStatusId = bookRepository.InsertBookStatus(newStatusHistory).Result.Id;
+            newBook.CurrentStatusId = newBookStatusId;
+            await bookRepository.UpdateBook(newBook);
+
+            //If author is not null
+            if(insertBookDto.AuthorId.HasValue)
+            {
+                BookAuthorPOCO bookAuthorConnection = new BookAuthorPOCO
+                {
+                    AuthorId = insertBookDto.AuthorId.Value,
+                    BookId = newBookId
+                };
+                await authorRepository.AssignBookToAuthor(bookAuthorConnection);
+            }
+
+            return newBookId;
         }
-
-
     }
 }

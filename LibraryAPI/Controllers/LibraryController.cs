@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LibraryAPI.Database;
 using LibraryAPI.Enums;
-using LibraryAPI.Models.DTO;
+using LibraryAPI.Models.DTOs;
 using LibraryAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -64,7 +64,7 @@ namespace LibraryAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Guid>> InsertBook([FromBody] InsertBookDto insertBookDto)
         {
-            return Ok();
+            return await bookService.InsertBook(insertBookDto);
         }
 
         /// <summary>

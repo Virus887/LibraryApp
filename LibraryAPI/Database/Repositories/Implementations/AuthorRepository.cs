@@ -1,5 +1,5 @@
 ﻿using LibraryAPI.Database.Repositories.Interfaces;
-using LibraryAPI.Models.POCO;
+using LibraryAPI.Models.POCOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +16,24 @@ namespace LibraryAPI.Database.Repositories.Implementations
             dbContext = context;
         }
 
+        public async Task<BookAuthorPOCO> AssignBookToAuthor(BookAuthorPOCO bookAuthorPOCO)
+        {
+            if (bookAuthorPOCO == null)
+                throw new Exception("bookAuthor is null");
+
+            try
+            {
+                await dbContext.BookAuthors.AddAsync(bookAuthorPOCO);
+                await dbContext.SaveChangesAsync();
+
+                return bookAuthorPOCO;
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
         public AuthorPOCO GetById(Guid id)
         {
             var author = dbContext.Find<AuthorPOCO>(id);
@@ -27,5 +45,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
 
             return author;
         }
+
+
     }
 }
