@@ -9,12 +9,10 @@ namespace LibraryAPI.Services.Interfaces
 {
     public interface IBookService
     {
-        //TODO: change to get all books
-        public IEnumerable<Book> GetAll();
+        public IEnumerable<Book> GetAllBooks();
+        public IEnumerable<Book> GetBooksForPage(int page, int limit);
         public IEnumerable<BookStatus> GetBookStatuses(Guid bookId);
-
         public Task<Guid> InsertBook(InsertBookDto insertBookDto);
-
         public bool ChangeBookStatus(Guid bookId, Statuses status);
 
     }

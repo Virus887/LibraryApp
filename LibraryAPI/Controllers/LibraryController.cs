@@ -29,7 +29,7 @@ namespace LibraryAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Book>> GetBooks(int page = 0, int limit = 10)
         {
-            var result = bookService.GetAll();
+            var result = bookService.GetBooksForPage(page, limit);
             if (result != null)
             {
                 return Ok(result);

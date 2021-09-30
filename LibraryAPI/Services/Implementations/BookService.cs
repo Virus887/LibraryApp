@@ -37,7 +37,7 @@ namespace LibraryAPI.Services.Implementations
             return true;
         }
 
-        public IEnumerable<Book> GetAll()
+        public IEnumerable<Book> GetAllBooks()
         {
             var books = bookRepository.GetAll();
             var bookDTOs = new List<Book>();
@@ -52,6 +52,32 @@ namespace LibraryAPI.Services.Implementations
                     });
             }
             return bookDTOs.AsQueryable();
+        }
+
+        public IEnumerable<Book> GetBooksForPage(int page, int limit)
+        {
+            var books = bookRepository.GetAll().OrderBy(x=>x.Title).Skip(page*limit).Take(limit).AsQueryable();
+            var authors = authorRepository.GetAllBookAuthors().ToList();
+            var bookDTOs = new List<Book>();
+
+            foreach(var book in books)
+            {
+                //var authorPoco = authorRepository.GetBookAuthorsById(book.Id);
+                var authorPoco = authors.Where(x => x.BookId == book.Id).FirstOrDefault()?.Author;
+                bookDTOs.Add(new Book
+                {
+                    Id = book.Id,
+                    Title = book.Title,
+                    Author = (authorPoco == null) ? null : new Author
+                    {
+                        Name = authorPoco.FirstName + " " + authorPoco.LastName,
+                        DateOfBirth = authorPoco.DateOfBirth ?? DateTime.MinValue
+                    }
+                });
+            }
+            
+
+            return bookDTOs;
         }
 
 

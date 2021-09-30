@@ -34,6 +34,24 @@ namespace LibraryAPI.Database.Repositories.Implementations
             }
         }
 
+        public IQueryable<BookAuthorPOCO> GetAllBookAuthors()
+        {
+            return dbContext.BookAuthors;
+        }
+
+        public AuthorPOCO GetBookAuthorsById(Guid bookId)
+        {
+            var bookAuthor = dbContext.BookAuthors.Where(x => x.BookId == bookId).FirstOrDefault();
+            if(bookAuthor != null)
+            {
+                return bookAuthor.Author ?? null;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         public AuthorPOCO GetById(Guid id)
         {
             var author = dbContext.Find<AuthorPOCO>(id);

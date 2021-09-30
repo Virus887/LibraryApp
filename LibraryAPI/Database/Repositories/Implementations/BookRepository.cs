@@ -33,6 +33,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
             return result;
         }
 
+
         public IQueryable<StatusHistoryPOCO> GetStatusHistoryByBookId(Guid bookId)
         {
             var result = dbContext.StatusHistories.Where(x => x.BookId == bookId);
