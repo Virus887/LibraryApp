@@ -94,7 +94,7 @@ namespace LibraryAPI.Services.Implementations
                         Id=status.Id,
                         BookId = status.BookId,
                         ModifiedDate = status.ModifiedDate,
-                        Status = Enum.Parse<Enums.Statuses>(status.Status)
+                        Status = Enum.Parse<Statuses>(status.Status)
                     });
             }
 
@@ -104,8 +104,26 @@ namespace LibraryAPI.Services.Implementations
         public BookDetails GetBookDetails(Guid bookId)
         {
             //bookId = new Guid("");
-            var x = bookPriceProvider.GetBookPrice(bookId).Result;
-            return new BookDetails();
+            double price = bookPriceProvider.GetBookPrice(bookId).Result;
+            BookPOCO bookPoco = bookRepository.GetById(bookId);
+            AuthorPOCO authorPoco = authorRepository.GetAuthorOfBook(bookId);
+            BookDetails bookDetails = new BookDetails
+            {
+                Id = bookPoco.Id,
+                PublicationDate = bookPoco.PublicationDate ?? DateTime.MinValue,
+                Author = (authorPoco == null) ? null : new Author
+                {
+                    Name = authorPoco.FirstName + " " + authorPoco.LastName,
+                    DateOfBirth = authorPoco.DateOfBirth ?? DateTime.MinValue
+                },
+                Title = bookPoco.Title,
+                Genre = Enum.Parse<BookGenres>(bookPoco.Genre),
+                Language = bookPoco.Language,
+                IsPolish = (bookPoco.Language == "Polski" || bookPoco.Language == "polski"),
+                CurrentStatus = bookRepository.GetBookCurrentStatus(bookId),
+                CurrentPrice = price
+            };
+            return bookDetails;
         }
 
         public async Task<Guid> InsertBook(InsertBookDto insertBookDto)

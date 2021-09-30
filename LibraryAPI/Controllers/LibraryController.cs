@@ -49,7 +49,14 @@ namespace LibraryAPI.Controllers
         public ActionResult<BookDetails> GetBookDetails([FromRoute] Guid bookId)
         {
             var result = bookService.GetBookDetails(bookId);
-            return Ok();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         /// <summary>

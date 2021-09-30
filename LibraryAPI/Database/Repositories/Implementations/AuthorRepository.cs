@@ -39,17 +39,10 @@ namespace LibraryAPI.Database.Repositories.Implementations
             return dbContext.BookAuthors;
         }
 
-        public AuthorPOCO GetBookAuthorsById(Guid bookId)
+        public AuthorPOCO GetAuthorOfBook(Guid bookId)
         {
-            var bookAuthor = dbContext.BookAuthors.Where(x => x.BookId == bookId).FirstOrDefault();
-            if(bookAuthor != null)
-            {
-                return bookAuthor.Author ?? null;
-            }
-            else
-            {
-                return null;
-            }
+            BookAuthorPOCO bookAuthor = dbContext.BookAuthors.Where(x => x.BookId == bookId).FirstOrDefault();
+            return bookAuthor?.Author ?? null;
         }
 
         public AuthorPOCO GetById(Guid id)

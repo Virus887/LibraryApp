@@ -1,4 +1,5 @@
 ﻿using LibraryAPI.Database.Repositories.Interfaces;
+using LibraryAPI.Enums;
 using LibraryAPI.Models.POCOs;
 using System;
 using System.Collections.Generic;
@@ -98,6 +99,18 @@ namespace LibraryAPI.Database.Repositories.Implementations
             {
                 return null;
             }
+        }
+
+        public Statuses GetBookCurrentStatus(Guid bookId)
+        {
+            var result = dbContext.StatusHistories.Where(x => x.BookId == bookId).FirstOrDefault();
+           
+            if (result == null)
+            {
+                throw new Exception("There is no book with given Id.");
+            }
+
+            return Enum.Parse<Statuses>(result.Status);
         }
     }
 }
