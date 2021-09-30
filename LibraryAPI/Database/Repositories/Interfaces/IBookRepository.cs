@@ -8,8 +8,9 @@ namespace LibraryAPI.Database.Repositories.Interfaces
 {
     public interface IBookRepository
     {
-        public BookPOCO GetById(Guid id);
+        public BookPOCO GetById(Guid bookId);
         public IQueryable<BookPOCO> GetAll();
 
+        public IQueryable<StatusHistoryPOCO> GetStatusHistoryByBookId(Guid bookId);
     }
 }

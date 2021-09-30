@@ -21,9 +21,9 @@ namespace LibraryAPI.Database.Repositories.Implementations
             return dbContext.Books;
         }
 
-        public BookPOCO GetById(Guid id)
+        public BookPOCO GetById(Guid bookId)
         {
-            var result = dbContext.Find<BookPOCO>(id);
+            var result = dbContext.Books.Find(bookId);
 
             if (result == null)
             {
@@ -32,5 +32,18 @@ namespace LibraryAPI.Database.Repositories.Implementations
 
             return result;
         }
+
+        public IQueryable<StatusHistoryPOCO> GetStatusHistoryByBookId(Guid bookId)
+        {
+            var result = dbContext.StatusHistories.Where(x => x.BookId == bookId);
+
+            if (result == null)
+            {
+                throw new Exception("There is no book with given Id.");
+            }
+
+            return result;
+        }
+
     }
 }

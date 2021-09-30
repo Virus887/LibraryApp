@@ -8,6 +8,10 @@ namespace LibraryAPI.Services.Interfaces
 {
     public interface IBookService
     {
-        public IQueryable<Book> GetAll();
+        //TODO: change to get all books
+        public IEnumerable<Book> GetAll();
+        public IEnumerable<BookStatus> GetBookStatuses(Guid bookId);
+
+        public int InsertBook(InsertBookDto insertBookDto);
     }
 }

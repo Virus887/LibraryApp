@@ -51,7 +51,8 @@ namespace LibraryAPI.Controllers
         /// <returns>List of BookStatuses</returns>
         [HttpGet("statuses/{bookId}")]
         public ActionResult<IEnumerable<BookStatus>> GetBookStatuses([FromRoute] Guid bookId)
-        {
+        {           
+            return bookService.GetBookStatuses(bookId).ToList();
             return Ok();
         }
 
