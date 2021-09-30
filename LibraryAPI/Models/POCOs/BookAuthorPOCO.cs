@@ -5,12 +5,12 @@ using System.Collections.Generic;
 
 namespace LibraryAPI.Models.POCO
 {
-    public partial class BookAuthor
+    public partial class BookAuthorPOCO
     {
         public Guid BookId { get; set; }
         public Guid AuthorId { get; set; }
 
-        public virtual Author Author { get; set; }
-        public virtual Book Book { get; set; }
+        public AuthorPOCO Author { get; set; }
+        public BookPOCO Book { get; set; }
     }
 }

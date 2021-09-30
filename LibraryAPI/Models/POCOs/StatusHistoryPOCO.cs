@@ -5,13 +5,13 @@ using System.Collections.Generic;
 
 namespace LibraryAPI.Models.POCO
 {
-    public partial class StatusHistory
+    public partial class StatusHistoryPOCO
     {
         public Guid Id { get; set; }
         public Guid BookId { get; set; }
         public DateTime ModifiedDate { get; set; }
         public string Status { get; set; }
 
-        public virtual Book Book { get; set; }
+        public BookPOCO Book { get; set; }
     }
 }

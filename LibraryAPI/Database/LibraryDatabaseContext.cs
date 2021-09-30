@@ -18,37 +18,32 @@ namespace LibraryAPI.Database
         {
         }
 
-        public virtual DbSet<Author> Authors { get; set; }
-        public virtual DbSet<Book> Books { get; set; }
-        public virtual DbSet<BookAuthor> BookAuthors { get; set; }
-        public virtual DbSet<StatusHistory> StatusHistories { get; set; }
+        public virtual DbSet<AuthorPOCO> Authors { get; set; }
+        public virtual DbSet<BookPOCO> Books { get; set; }
+        public virtual DbSet<BookAuthorPOCO> BookAuthors { get; set; }
+        public virtual DbSet<StatusHistoryPOCO> StatusHistories { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //if (!optionsBuilder.IsConfigured)
-            //{
-            //    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-            //    optionsBuilder.UseSqlServer("Server=.\\SQLExpress;Database=LibraryDatabase;Trusted_Connection=True;");
-            //}
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "Polish_CI_AS");
 
-            modelBuilder.Entity<Author>(entity =>
+            modelBuilder.Entity<AuthorPOCO>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
             });
 
-            modelBuilder.Entity<Book>(entity =>
+            modelBuilder.Entity<BookPOCO>(entity =>
             {
                 entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Language).HasMaxLength(50);
             });
 
-            modelBuilder.Entity<BookAuthor>(entity =>
+            modelBuilder.Entity<BookAuthorPOCO>(entity =>
             {
                 entity.HasNoKey();
 
@@ -67,7 +62,7 @@ namespace LibraryAPI.Database
                     .HasConstraintName("FK__BookAutho__BookI__286302EC");
             });
 
-            modelBuilder.Entity<StatusHistory>(entity =>
+            modelBuilder.Entity<StatusHistoryPOCO>(entity =>
             {
                 entity.HasNoKey();
 

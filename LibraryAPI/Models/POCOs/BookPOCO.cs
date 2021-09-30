@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace LibraryAPI.Models.POCO
 {
-    public partial class Book
+    public partial class BookPOCO
     {
         public Guid Id { get; set; }
         public Guid? CurrentStatusId { get; set; }
