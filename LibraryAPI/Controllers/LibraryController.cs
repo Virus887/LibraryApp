@@ -48,6 +48,7 @@ namespace LibraryAPI.Controllers
         [HttpGet("details/{bookId}")]
         public ActionResult<BookDetails> GetBookDetails([FromRoute] Guid bookId)
         {
+            var result = bookService.GetBookDetails(bookId);
             return Ok();
         }
 

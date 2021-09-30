@@ -1,4 +1,6 @@
+using System;
 using System.Text.Json.Serialization;
+using LibraryAPI.BookPricesProvider;
 using LibraryAPI.Database;
 using LibraryAPI.Database.Repositories.Implementations;
 using LibraryAPI.Database.Repositories.Interfaces;
@@ -29,6 +31,9 @@ namespace LibraryAPI
                 .AddControllers()
                 .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
+            services.AddHttpClient("bookPriceAPI", c =>
+                    { c.BaseAddress = new Uri("http://60c35511917002001739e94a.mockapi.io/api/v1/"); });
+
             // configuring DatabaseContext:
             services.AddDbContext<LibraryDbContext>(options =>
                      options.UseSqlServer(Configuration.GetConnectionString("LibraryDB")));
@@ -37,6 +42,7 @@ namespace LibraryAPI
             // adding services
             services.AddScoped<IBookService, BookService>();
             services.AddScoped<IAuthorService, AuthorService>();
+            services.AddScoped<IBookPriceProvider, BookPriceProvider>();
 
             services.AddTransient<IBookRepository, BookRepository>();
             services.AddTransient<IAuthorRepository, AuthorRepository>();

@@ -1,4 +1,5 @@
-﻿using LibraryAPI.Database.Repositories.Interfaces;
+﻿using LibraryAPI.BookPricesProvider;
+using LibraryAPI.Database.Repositories.Interfaces;
 using LibraryAPI.Enums;
 using LibraryAPI.Models.DTOs;
 using LibraryAPI.Models.POCOs;
@@ -12,13 +13,15 @@ namespace LibraryAPI.Services.Implementations
 {
     public class BookService : IBookService
     {
-        private IBookRepository bookRepository;
-        private IAuthorRepository authorRepository;
+        private readonly IBookRepository bookRepository;
+        private readonly IAuthorRepository authorRepository;
+        private readonly IBookPriceProvider bookPriceProvider;
         
-        public BookService(IBookRepository bookRepository, IAuthorRepository authorRepository)
+        public BookService(IBookRepository bookRepository, IAuthorRepository authorRepository, IBookPriceProvider bookPriceProvider)
         {
             this.bookRepository = bookRepository;
             this.authorRepository = authorRepository;
+            this.bookPriceProvider = bookPriceProvider;
         }
 
         public bool ChangeBookStatus(Guid bookId, Statuses status)
@@ -56,13 +59,12 @@ namespace LibraryAPI.Services.Implementations
 
         public IEnumerable<Book> GetBooksForPage(int page, int limit)
         {
-            var books = bookRepository.GetAll().OrderBy(x=>x.Title).Skip(page*limit).Take(limit).AsQueryable();
+            var books = bookRepository.GetAll().OrderBy(x=>x.Title).Skip(page*limit).Take(limit);
             var authors = authorRepository.GetAllBookAuthors().ToList();
             var bookDTOs = new List<Book>();
 
             foreach(var book in books)
             {
-                //var authorPoco = authorRepository.GetBookAuthorsById(book.Id);
                 var authorPoco = authors.Where(x => x.BookId == book.Id).FirstOrDefault()?.Author;
                 bookDTOs.Add(new Book
                 {
@@ -75,8 +77,6 @@ namespace LibraryAPI.Services.Implementations
                     }
                 });
             }
-            
-
             return bookDTOs;
         }
 
@@ -101,8 +101,13 @@ namespace LibraryAPI.Services.Implementations
             return statuses.ToList();
         }
 
+        public BookDetails GetBookDetails(Guid bookId)
+        {
+            //bookId = new Guid("");
+            var x = bookPriceProvider.GetBookPrice(bookId).Result;
+            return new BookDetails();
+        }
 
-        //Może najpierw dodać książkę, później status, a później w książce ustawić status guid?
         public async Task<Guid> InsertBook(InsertBookDto insertBookDto)
         {
             // Create new book

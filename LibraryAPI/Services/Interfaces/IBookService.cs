@@ -11,6 +11,7 @@ namespace LibraryAPI.Services.Interfaces
     {
         public IEnumerable<Book> GetAllBooks();
         public IEnumerable<Book> GetBooksForPage(int page, int limit);
+        public BookDetails GetBookDetails(Guid bookId);
         public IEnumerable<BookStatus> GetBookStatuses(Guid bookId);
         public Task<Guid> InsertBook(InsertBookDto insertBookDto);
         public bool ChangeBookStatus(Guid bookId, Statuses status);
