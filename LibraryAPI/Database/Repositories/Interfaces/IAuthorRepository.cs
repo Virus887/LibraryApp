@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LibraryAPI.Database.Repositories.Interfaces
 {
-    interface IAuthorRepository
+    public interface IAuthorRepository
     {
         public AuthorPOCO GetById(Guid id); 
     }

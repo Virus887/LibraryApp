@@ -1,5 +1,9 @@
 using System.Text.Json.Serialization;
 using LibraryAPI.Database;
+using LibraryAPI.Database.Repositories.Implementations;
+using LibraryAPI.Database.Repositories.Interfaces;
+using LibraryAPI.Services.Implementations;
+using LibraryAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +33,13 @@ namespace LibraryAPI
             services.AddDbContext<LibraryDbContext>(options =>
                      options.UseSqlServer(Configuration.GetConnectionString("LibraryDB")));
 
+
+            // adding services
+            services.AddScoped<IBookService, BookService>();
+            services.AddScoped<IAuthorService, AuthorService>();
+
+            services.AddTransient<IBookRepository, BookRepository>();
+            services.AddTransient<IAuthorRepository, AuthorRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

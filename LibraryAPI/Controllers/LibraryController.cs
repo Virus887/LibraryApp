@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using LibraryAPI.Database;
 using LibraryAPI.Enums;
 using LibraryAPI.Models.DTO;
+using LibraryAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LibraryAPI.Controllers
@@ -12,11 +14,11 @@ namespace LibraryAPI.Controllers
     [ApiController]
     public class LibraryController : ControllerBase
     {
-        private LibraryDbContext dbContext;
+        private readonly IBookService bookService;
 
-        public LibraryController(LibraryDbContext context)
+        public LibraryController(IBookService bookService)
         {
-            dbContext = context;
+            this.bookService = bookService;
         }
         /// <summary>
         /// Get list of books (Id and Title)
@@ -26,21 +28,9 @@ namespace LibraryAPI.Controllers
         /// <returns>List of Books sorted by book title</returns>
         [HttpGet]
         public ActionResult<IEnumerable<Book>> GetBooks(int page = 0, int limit = 10)
-        {      
-            var books = dbContext.Books;
-            List<Book> bookDtos = new List<Book>();
-            foreach(var book in books)
-            {
-                bookDtos.Add(
-                    new Book
-                    {
-                        Id = book.Id,
-                        Author = null,
-                        Title = book.Title
-                    });
-            }
-            return bookDtos.ToArray();
-            return Ok();
+        {
+            var books = bookService.GetAll();
+            return books.ToList();
         }
 
         /// <summary>
