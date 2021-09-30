@@ -1,4 +1,5 @@
 ﻿using LibraryAPI.Database.Repositories.Interfaces;
+using LibraryAPI.Enums;
 using LibraryAPI.Models.DTOs;
 using LibraryAPI.Models.POCOs;
 using LibraryAPI.Services.Interfaces;
@@ -18,6 +19,22 @@ namespace LibraryAPI.Services.Implementations
         {
             this.bookRepository = bookRepository;
             this.authorRepository = authorRepository;
+        }
+
+        public bool ChangeBookStatus(Guid bookId, Statuses status)
+        {
+            StatusHistoryPOCO newHistoryStatus = new StatusHistoryPOCO
+            {
+                BookId = bookId,
+                Status = status.ToString(),
+                ModifiedDate = DateTime.Now
+            };
+            var newStatusId = bookRepository.InsertBookStatus(newHistoryStatus).Result.Id;
+
+            // Change book current status
+            var bookToChange =  bookRepository.GetById(bookId);
+            bookToChange.CurrentStatusId = newStatusId;
+            return true;
         }
 
         public IEnumerable<Book> GetAll()
@@ -59,11 +76,10 @@ namespace LibraryAPI.Services.Implementations
         }
 
 
-        //Możr najpierw dodać książkę, później status, a później w książce ustawić status guid?
+        //Może najpierw dodać książkę, później status, a później w książce ustawić status guid?
         public async Task<Guid> InsertBook(InsertBookDto insertBookDto)
         {
-            //create new book
-
+            // Create new book
             BookPOCO newBook = new BookPOCO
             {
                 Id = Guid.NewGuid(),
@@ -71,16 +87,14 @@ namespace LibraryAPI.Services.Implementations
                 Language = insertBookDto.Language,
                 PublicationDate = insertBookDto.PublicationDate ?? null,
                 PageNumber = null,
-                CurrentStatusId = Guid.NewGuid(),
                 Genre = insertBookDto.Genre.ToString() ?? null
             };
 
             Guid newBookId = bookRepository.InsertBook(newBook).Result.Id;
 
-            //Assign new status to book
+            // Assign new status to book
             StatusHistoryPOCO newStatusHistory = new StatusHistoryPOCO
             {
-                Id = newBook.CurrentStatusId ?? new Guid(),
                 BookId = newBookId,
                 Status = "InStock",
                 //Warning: if publication date is null, we assign DateTime.MinValue
@@ -91,7 +105,7 @@ namespace LibraryAPI.Services.Implementations
             newBook.CurrentStatusId = newBookStatusId;
             await bookRepository.UpdateBook(newBook);
 
-            //If author is not null
+            // If author is not null
             if(insertBookDto.AuthorId.HasValue)
             {
                 BookAuthorPOCO bookAuthorConnection = new BookAuthorPOCO

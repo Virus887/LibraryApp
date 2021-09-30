@@ -29,8 +29,15 @@ namespace LibraryAPI.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Book>> GetBooks(int page = 0, int limit = 10)
         {
-            var books = bookService.GetAll();
-            return books.ToList();
+            var result = bookService.GetAll();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         /// <summary>
@@ -51,9 +58,16 @@ namespace LibraryAPI.Controllers
         /// <returns>List of BookStatuses</returns>
         [HttpGet("statuses/{bookId}")]
         public ActionResult<IEnumerable<BookStatus>> GetBookStatuses([FromRoute] Guid bookId)
-        {           
-            return bookService.GetBookStatuses(bookId).ToList();
-            return Ok();
+        {
+            var result = bookService.GetBookStatuses(bookId).ToList();
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         /// <summary>
@@ -64,7 +78,16 @@ namespace LibraryAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Guid>> InsertBook([FromBody] InsertBookDto insertBookDto)
         {
-            return await bookService.InsertBook(insertBookDto);
+            var result = await bookService.InsertBook(insertBookDto);
+            if(result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            }
+
         }
 
         /// <summary>
@@ -75,7 +98,15 @@ namespace LibraryAPI.Controllers
         [HttpPost("status/{bookId}")]
         public ActionResult ChangeBookStatus([FromRoute] Guid bookId, [FromBody] Statuses status)
         {
-            return Ok();
+            var result = bookService.ChangeBookStatus(bookId, status);
+            if(result)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
     }
 }

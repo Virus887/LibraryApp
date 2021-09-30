@@ -1,4 +1,5 @@
-﻿using LibraryAPI.Models.DTOs;
+﻿using LibraryAPI.Enums;
+using LibraryAPI.Models.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,8 @@ namespace LibraryAPI.Services.Interfaces
         public IEnumerable<BookStatus> GetBookStatuses(Guid bookId);
 
         public Task<Guid> InsertBook(InsertBookDto insertBookDto);
+
+        public bool ChangeBookStatus(Guid bookId, Statuses status);
+
     }
 }
