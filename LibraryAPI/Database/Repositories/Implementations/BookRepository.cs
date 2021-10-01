@@ -1,6 +1,7 @@
 ﻿using LibraryAPI.Database.Repositories.Interfaces;
 using LibraryAPI.Enums;
 using LibraryAPI.Models.POCOs;
+using LibraryAPI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,100 +18,114 @@ namespace LibraryAPI.Database.Repositories.Implementations
             dbContext = context;
         }
 
-        public IQueryable<BookPOCO> GetAll()
+        public ServiceResult<IQueryable<BookPOCO>> GetAll()
         {
-            return dbContext.Books;
+            return new ServiceResult<IQueryable<BookPOCO>>(result: dbContext.Books);
         }
 
-        public BookPOCO GetById(Guid bookId)
+        public ServiceResult<BookPOCO> GetById(Guid bookId)
         {
             var result = dbContext.Books.Find(bookId);
 
             if (result == null)
             {
-                throw new Exception("There is no book with given Id.");
+                return ServiceResult<BookPOCO>.GetResourceNotFoundResult();
             }
 
-            return result;
+            return new ServiceResult<BookPOCO>(result: result);
         }
 
 
-        public IQueryable<StatusHistoryPOCO> GetStatusHistoryByBookId(Guid bookId)
+        public ServiceResult<IQueryable<StatusHistoryPOCO>> GetStatusHistoryByBookId(Guid bookId)
         {
             var result = dbContext.StatusHistories.Where(x => x.BookId == bookId);
 
             if (result == null)
             {
-                throw new Exception("There is no book with given Id.");
+                return ServiceResult<IQueryable<StatusHistoryPOCO>>.GetResourceNotFoundResult();
             }
 
-            return result;
+           return new ServiceResult<IQueryable<StatusHistoryPOCO>>(result: result);
         }
 
-        public async Task<BookPOCO> InsertBook(BookPOCO bookPOCO)
+        public async Task<ServiceResult<BookPOCO>> InsertBook(BookPOCO bookPOCO)
         {
             if (bookPOCO == null)
-                throw new Exception("book is null");
+            {
+                return ServiceResult<BookPOCO>.GetEntityNullResult();
+            }
 
             try
             {
                 await dbContext.Books.AddAsync(bookPOCO);
                 await dbContext.SaveChangesAsync();
 
-                return bookPOCO;
+                return new ServiceResult<BookPOCO>(result: bookPOCO);
             }
             catch (Exception e)
             {
-                return null;
+                return ServiceResult<BookPOCO>.GetInternalErrorResult();
             }
         }
 
-        public async Task<BookPOCO> UpdateBook(BookPOCO bookPOCO)
+        public async Task<ServiceResult<BookPOCO>> UpdateBook(BookPOCO bookPOCO)
         {
             if (bookPOCO == null)
             {
-                throw new Exception("book is null");
+                return ServiceResult<BookPOCO>.GetEntityNullResult();
             }
             try
             {
                 dbContext.Books.Update(bookPOCO);
                 await dbContext.SaveChangesAsync();
-                return bookPOCO;
+
+                return new ServiceResult<BookPOCO>(result: bookPOCO);
             }
             catch (Exception e)
             {
-                return null;
+                return ServiceResult<BookPOCO>.GetInternalErrorResult();
             }
         }
 
-        public async Task<StatusHistoryPOCO> InsertBookStatus(StatusHistoryPOCO statusHistoryPOCO)
+        public async Task<ServiceResult<StatusHistoryPOCO>> InsertBookStatus(StatusHistoryPOCO statusHistoryPOCO)
         {
             if (statusHistoryPOCO == null)
-                throw new Exception("book is null");
+            {
+                return ServiceResult<StatusHistoryPOCO>.GetEntityNullResult();
+            }
 
             try
             {
                 await dbContext.StatusHistories.AddAsync(statusHistoryPOCO);
                 await dbContext.SaveChangesAsync();
 
-                return statusHistoryPOCO;
+                return new ServiceResult<StatusHistoryPOCO>(result: statusHistoryPOCO);
             }
             catch (Exception e)
             {
-                return null;
+                return ServiceResult<StatusHistoryPOCO>.GetInternalErrorResult();
             }
         }
 
-        public Statuses GetBookCurrentStatus(Guid bookId)
+        public ServiceResult<Statuses> GetBookCurrentStatus(Guid bookId)
         {
             var result = dbContext.StatusHistories.Where(x => x.BookId == bookId).FirstOrDefault();
            
             if (result == null)
             {
-                throw new Exception("There is no book with given Id.");
+                return ServiceResult<Statuses>.GetResourceNotFoundResult();
             }
 
-            return Enum.Parse<Statuses>(result.Status);
+            if(Enum.TryParse<Statuses>(result.Status, out Statuses status))
+            {
+                return new ServiceResult<Statuses>(result: status);
+            }
+            else
+            {
+                return ServiceResult<Statuses>.GetResourceNotFoundResult();
+            }
+
+            
         }
     }
 }

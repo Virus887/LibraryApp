@@ -1,5 +1,6 @@
 ﻿using LibraryAPI.Enums;
 using LibraryAPI.Models.POCOs;
+using LibraryAPI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +10,18 @@ namespace LibraryAPI.Database.Repositories.Interfaces
 {
     public interface IBookRepository
     {
-        public BookPOCO GetById(Guid bookId);
-        public IQueryable<BookPOCO> GetAll();
+        public ServiceResult<BookPOCO> GetById(Guid bookId);
+        public ServiceResult<IQueryable<BookPOCO>> GetAll();
 
-        public IQueryable<StatusHistoryPOCO> GetStatusHistoryByBookId(Guid bookId);
+        public ServiceResult<IQueryable<StatusHistoryPOCO>> GetStatusHistoryByBookId(Guid bookId);
 
-        public Statuses GetBookCurrentStatus(Guid bookId);
+        public ServiceResult<Statuses> GetBookCurrentStatus(Guid bookId);
 
-        public Task<BookPOCO> InsertBook(BookPOCO bookPOCO);
+        public Task<ServiceResult<BookPOCO>> InsertBook(BookPOCO bookPOCO);
 
-        public Task<BookPOCO> UpdateBook(BookPOCO bookPOCO);
+        public Task<ServiceResult<BookPOCO>> UpdateBook(BookPOCO bookPOCO);
 
-        public Task<StatusHistoryPOCO> InsertBookStatus(StatusHistoryPOCO statusHistoryPOCO);
+        public Task<ServiceResult<StatusHistoryPOCO>> InsertBookStatus(StatusHistoryPOCO statusHistoryPOCO);
 
     }
 }

@@ -14,7 +14,7 @@ namespace LibraryAPI.BookPricesProvider
         {
             this.clientFactory = clientFactory;
         }
-        public async Task<double> GetBookPrice(Guid bookId)
+        public async Task<double?> GetBookPrice(Guid bookId)
         {
             var client = clientFactory.CreateClient("bookPriceAPI");
             var result = await client.GetAsync($"Prices/{bookId.ToString().ToLower()}");
@@ -28,7 +28,7 @@ namespace LibraryAPI.BookPricesProvider
             }
             else
             {
-                return 0.0;
+                return null;
             }
         }
     }

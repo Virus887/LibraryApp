@@ -1,5 +1,6 @@
 ﻿using LibraryAPI.Database.Repositories.Interfaces;
 using LibraryAPI.Models.POCOs;
+using LibraryAPI.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,45 +17,53 @@ namespace LibraryAPI.Database.Repositories.Implementations
             dbContext = context;
         }
 
-        public async Task<BookAuthorPOCO> AssignBookToAuthor(BookAuthorPOCO bookAuthorPOCO)
+        public async Task<ServiceResult<BookAuthorPOCO>> AssignBookToAuthor(BookAuthorPOCO bookAuthorPOCO)
         {
             if (bookAuthorPOCO == null)
-                throw new Exception("bookAuthor is null");
-
+            {
+                return ServiceResult<BookAuthorPOCO>.GetEntityNullResult();
+            }      
             try
             {
                 await dbContext.BookAuthors.AddAsync(bookAuthorPOCO);
                 await dbContext.SaveChangesAsync();
 
-                return bookAuthorPOCO;
+                return new ServiceResult<BookAuthorPOCO>(result: bookAuthorPOCO);
             }
             catch (Exception e)
             {
-                return null;
+                return ServiceResult<BookAuthorPOCO>.GetInternalErrorResult();
             }
         }
 
-        public IQueryable<BookAuthorPOCO> GetAllBookAuthors()
+        public ServiceResult<IQueryable<BookAuthorPOCO>> GetAllBookAuthors()
         {
-            return dbContext.BookAuthors;
+            return new ServiceResult<IQueryable<BookAuthorPOCO>>(result: dbContext.BookAuthors);
         }
 
-        public AuthorPOCO GetAuthorOfBook(Guid bookId)
+        public ServiceResult<AuthorPOCO> GetAuthorOfBook(Guid bookId)
         {
             BookAuthorPOCO bookAuthor = dbContext.BookAuthors.Where(x => x.BookId == bookId).FirstOrDefault();
-            return bookAuthor?.Author ?? null;
+            if(bookAuthor == null)
+            {
+                return ServiceResult<AuthorPOCO>.GetResourceNotFoundResult();
+            }
+            else
+            {
+                return new ServiceResult<AuthorPOCO>(result: bookAuthor.Author);
+            }
         }
 
-        public AuthorPOCO GetById(Guid id)
+        public ServiceResult<AuthorPOCO> GetById(Guid id)
         {
             var author = dbContext.Find<AuthorPOCO>(id);
 
             if (author == null)
             {
-                throw new Exception("There is no user with given Id.");
+                return ServiceResult<AuthorPOCO>.GetResourceNotFoundResult();
             }
 
-            return author;
+            return new ServiceResult<AuthorPOCO>(result: author);
         }
 
 

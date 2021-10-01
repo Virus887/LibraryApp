@@ -30,14 +30,7 @@ namespace LibraryAPI.Controllers
         public ActionResult<IEnumerable<Book>> GetBooks(int page = 0, int limit = 10)
         {
             var result = bookService.GetBooksForPage(page, limit);
-            if (result != null)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound();
-            }
+            return new ControllerResult<IEnumerable<Book>>(result).GetResponse();
         }
 
         /// <summary>
@@ -49,14 +42,7 @@ namespace LibraryAPI.Controllers
         public ActionResult<BookDetails> GetBookDetails([FromRoute] Guid bookId)
         {
             var result = bookService.GetBookDetails(bookId);
-            if (result != null)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound();
-            }
+            return new ControllerResult<BookDetails>(result).GetResponse();
         }
 
         /// <summary>
@@ -67,15 +53,8 @@ namespace LibraryAPI.Controllers
         [HttpGet("statuses/{bookId}")]
         public ActionResult<IEnumerable<BookStatus>> GetBookStatuses([FromRoute] Guid bookId)
         {
-            var result = bookService.GetBookStatuses(bookId).ToList();
-            if (result != null)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound();
-            }
+            var result = bookService.GetBookStatuses(bookId);
+            return new ControllerResult<IEnumerable<BookStatus>>(result).GetResponse();
         }
 
         /// <summary>
@@ -87,15 +66,7 @@ namespace LibraryAPI.Controllers
         public async Task<ActionResult<Guid>> InsertBook([FromBody] InsertBookDto insertBookDto)
         {
             var result = await bookService.InsertBook(insertBookDto);
-            if(result != null)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound();
-            }
-
+            return new ControllerResult<Guid>(result).GetResponse();
         }
 
         /// <summary>
@@ -107,14 +78,7 @@ namespace LibraryAPI.Controllers
         public ActionResult ChangeBookStatus([FromRoute] Guid bookId, [FromBody] Statuses status)
         {
             var result = bookService.ChangeBookStatus(bookId, status);
-            if(result)
-            {
-                return Ok(result);
-            }
-            else
-            {
-                return NotFound();
-            }
+            return new ControllerResult<bool>(result).GetResponse();
         }
     }
 }

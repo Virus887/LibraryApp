@@ -9,12 +9,11 @@ namespace LibraryAPI.Services.Interfaces
 {
     public interface IBookService
     {
-        public IEnumerable<Book> GetAllBooks();
-        public IEnumerable<Book> GetBooksForPage(int page, int limit);
-        public BookDetails GetBookDetails(Guid bookId);
-        public IEnumerable<BookStatus> GetBookStatuses(Guid bookId);
-        public Task<Guid> InsertBook(InsertBookDto insertBookDto);
-        public bool ChangeBookStatus(Guid bookId, Statuses status);
+        public ServiceResult<IEnumerable<Book>> GetBooksForPage(int page, int limit);
+        public ServiceResult<BookDetails> GetBookDetails(Guid bookId);
+        public ServiceResult<IEnumerable<BookStatus>> GetBookStatuses(Guid bookId);
+        public Task<ServiceResult<Guid>> InsertBook(InsertBookDto insertBookDto);
+        public ServiceResult<bool> ChangeBookStatus(Guid bookId, Statuses status);
 
     }
 }

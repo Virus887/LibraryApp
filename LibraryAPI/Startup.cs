@@ -41,7 +41,6 @@ namespace LibraryAPI
 
             // adding services
             services.AddScoped<IBookService, BookService>();
-            services.AddScoped<IAuthorService, AuthorService>();
             services.AddScoped<IBookPriceProvider, BookPriceProvider>();
 
             services.AddTransient<IBookRepository, BookRepository>();
