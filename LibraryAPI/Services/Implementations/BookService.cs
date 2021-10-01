@@ -1,4 +1,5 @@
 ﻿using LibraryAPI.BookPricesProvider;
+using LibraryAPI.Database.Mapper;
 using LibraryAPI.Database.Repositories.Interfaces;
 using LibraryAPI.Enums;
 using LibraryAPI.Models.DTOs;
@@ -42,99 +43,78 @@ namespace LibraryAPI.Services.Implementations
             var bookToChangeResponse = bookRepository.GetById(bookId);
             if (!bookToChangeResponse.IsOk()) return new ServiceResult<bool>(false, bookToChangeResponse.Code, bookToChangeResponse.Message);
 
+            // Assign new status to book
             bookToChangeResponse.Result.CurrentStatusId = newStatusId;
-            return new ServiceResult<bool>(result: true);
+
+            return new ServiceResult<bool>(true);
         }
 
 
         public ServiceResult<IEnumerable<Book>> GetBooksForPage(int page, int limit)
         {
+            // Retrive data from repositories
             var booksResponse = bookRepository.GetAll();
             var authorsResponse = authorRepository.GetAllBookAuthors();
 
             if (!booksResponse.IsOk()) return new ServiceResult<IEnumerable<Book>>(null, booksResponse.Code, booksResponse.Message);
             if (!authorsResponse.IsOk()) return new ServiceResult<IEnumerable<Book>>(null, authorsResponse.Code, authorsResponse.Message);
 
-            var books = booksResponse.Result.OrderBy(x => x.Title).Skip(page * limit).Take(limit).ToList();
             var authors = authorsResponse.Result.ToList();
+            var books = booksResponse.Result
+                .OrderBy(x => x.Title == null)
+                .ThenBy(x=> x.Title)
+                .Skip(page * limit)
+                .Take(limit)
+                .ToList();
 
+            // Map results to Book outputs
             var bookDTOs = new List<Book>();
             foreach(var book in books)
             {
                 var authorPoco = authors.Where(x => x.BookId == book.Id).FirstOrDefault()?.Author;
-                var newBook = new Book
-                {
-                    Id = book.Id,
-                    Title = book.Title,
-                };
-                if(authorPoco != null)
-                {
-                    newBook.Author = (authorPoco == null) ? null : new Author
-                    {
-                        Name = authorPoco.FirstName + " " + authorPoco.LastName,
-                        DateOfBirth = authorPoco.DateOfBirth ?? DateTime.MinValue
-                    };
-                }
+                var newBook = Mapper.Map(book);
+                newBook.Author = Mapper.Map(authorPoco);           
                 bookDTOs.Add(newBook);
             }
-            return new ServiceResult<IEnumerable<Book>>(result: bookDTOs);;
+
+            return new ServiceResult<IEnumerable<Book>>(bookDTOs);
         }
 
 
         public ServiceResult<IEnumerable<BookStatus>> GetBookStatuses(Guid bookId)
         {
+            // Retrive data from repositories
             var statusHistoryResponse = bookRepository.GetStatusHistoryByBookId(bookId);
             if (!statusHistoryResponse.IsOk()) return new ServiceResult<IEnumerable<BookStatus>>(null, statusHistoryResponse.Code, statusHistoryResponse.Message);
 
-            var statusHistory = statusHistoryResponse.Result.OrderBy(x => x.ModifiedDate);
+            var statusHistories = statusHistoryResponse.Result.OrderBy(x => x.ModifiedDate).ToList();
 
-            var statuses = new List<BookStatus>();
-            foreach(var status in statusHistory)
-            {
-                statuses.Add(
-                    new BookStatus
-                    {
-                        Id=status.Id,
-                        BookId = status.BookId,
-                        ModifiedDate = status.ModifiedDate,
-                        Status = Enum.Parse<Statuses>(status.Status)
-                    });
-            }
-
-            return new ServiceResult<IEnumerable<BookStatus>>(result: statuses.ToList());
+            // Map results to BookStatus outputs
+            var result = Mapper.Map(statusHistories);
+            return new ServiceResult<IEnumerable<BookStatus>>(result);
         }
 
         public ServiceResult<BookDetails> GetBookDetails(Guid bookId)
         {
+            // Retrive data from repositories
             var bookResponse = bookRepository.GetById(bookId);
             if(!bookResponse.IsOk()) return new ServiceResult<BookDetails>(null, bookResponse.Code, bookResponse.Message);
 
-            var book = bookResponse.Result;
-           
+            var book = bookResponse.Result;    
             var status = bookRepository.GetBookCurrentStatus(bookId).Result;
+
+            // Get price from external API
             double? price = bookPriceProvider.GetBookPrice(bookId).Result;
 
-            BookDetails bookDetails = new BookDetails
-            {
-                Id = bookId,
-                PublicationDate = book.PublicationDate ?? DateTime.MinValue,
-                Title = book.Title,
-                Genre = Enum.Parse<BookGenres>(book.Genre),
-                Language = book.Language,
-                IsPolish = (book.Language == "Polski" || book.Language == "polski"),
-                CurrentStatus = status,
-                CurrentPrice = price ?? -1.0
-            };
+            // Map results to BookDetails
+            BookDetails bookDetails = Mapper.MapBookDetails(book);
+            bookDetails.CurrentStatus = status;
+            bookDetails.CurrentPrice = price ?? -1.0;
 
-            // Add author if exist
             var authorResponse = authorRepository.GetAuthorOfBook(bookId);
             if (authorResponse.IsOk())
             {
-                bookDetails.Author = new Author
-                {
-                    Name = authorResponse.Result.FirstName + " " + authorResponse.Result.LastName,
-                    DateOfBirth = authorResponse.Result.DateOfBirth ?? DateTime.MinValue
-                };
+                bookDetails.Author = Mapper.Map(authorResponse.Result);
             }
 
             return new ServiceResult<BookDetails>(bookDetails);
@@ -144,15 +124,9 @@ namespace LibraryAPI.Services.Implementations
         public async Task<ServiceResult<Guid>> InsertBook(InsertBookDto insertBookDto)
         {
             // Create new book
-            BookPOCO newBook = new BookPOCO
-            {
-                Id = Guid.NewGuid(),
-                Title = insertBookDto.Title,
-                Language = insertBookDto.Language,
-                PublicationDate = insertBookDto.PublicationDate ?? null,
-                PageNumber = null,
-                Genre = insertBookDto.Genre.ToString() ?? null
-            };
+            BookPOCO newBook = Mapper.Map(insertBookDto);
+            newBook.Id = Guid.NewGuid();
+
             var newBookResponse = await bookRepository.InsertBook(newBook);
             if (!newBookResponse.IsOk()) return new ServiceResult<Guid>(new Guid(), newBookResponse.Code, newBookResponse.Message);
 
@@ -161,7 +135,7 @@ namespace LibraryAPI.Services.Implementations
             {
                 BookId = newBookResponse.Result.Id,
                 Status = "InStock",
-                ModifiedDate = newBook.PublicationDate ?? DateTime.MinValue,
+                ModifiedDate = newBook.PublicationDate ?? DateTime.Now,
             };
             var newBookStatusResponse = await bookRepository.InsertBookStatus(newStatusHistory);
             if (!newBookStatusResponse.IsOk()) return new ServiceResult<Guid>(new Guid(), newBookStatusResponse.Code, newBookStatusResponse.Message);
