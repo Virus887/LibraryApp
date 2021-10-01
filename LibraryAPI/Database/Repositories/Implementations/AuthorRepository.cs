@@ -28,7 +28,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
                 await dbContext.BookAuthors.AddAsync(bookAuthorPOCO);
                 await dbContext.SaveChangesAsync();
 
-                return new ServiceResult<BookAuthorPOCO>(result: bookAuthorPOCO);
+                return new ServiceResult<BookAuthorPOCO>(bookAuthorPOCO);
             }
             catch (Exception e)
             {
@@ -58,7 +58,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
             }
             else
             {
-                return new ServiceResult<AuthorPOCO>(result: bookAuthor.Author);
+                return new ServiceResult<AuthorPOCO>(bookAuthor.Author);
             }
         }
 
@@ -71,7 +71,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
                 return ServiceResult<AuthorPOCO>.GetResourceNotFoundResult();
             }
 
-            return new ServiceResult<AuthorPOCO>(result: author);
+            return new ServiceResult<AuthorPOCO>(author);
         }
 
 

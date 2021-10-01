@@ -63,8 +63,6 @@ namespace LibraryAPI.Database.Mapper
         {
             if (book == null) return null;
 
-            bool x = (book.Language == "Polski" || book.Language == "polski");
-
             return new BookDetails
             {
                 Id = book.Id,

@@ -135,7 +135,7 @@ namespace LibraryAPI.Services.Implementations
             {
                 BookId = newBookResponse.Result.Id,
                 Status = "InStock",
-                ModifiedDate = newBook.PublicationDate ?? DateTime.Now,
+                ModifiedDate = DateTime.Now,
             };
             var newBookStatusResponse = await bookRepository.InsertBookStatus(newStatusHistory);
             if (!newBookStatusResponse.IsOk()) return new ServiceResult<Guid>(new Guid(), newBookStatusResponse.Code, newBookStatusResponse.Message);
