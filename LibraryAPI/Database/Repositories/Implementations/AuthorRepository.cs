@@ -28,7 +28,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
                 await dbContext.BookAuthors.AddAsync(bookAuthorPOCO);
                 await dbContext.SaveChangesAsync();
 
-                return new ServiceResult<BookAuthorPOCO>(result: bookAuthorPOCO);
+                return new ServiceResult<BookAuthorPOCO>(bookAuthorPOCO);
             }
             catch (Exception e)
             {
@@ -38,7 +38,15 @@ namespace LibraryAPI.Database.Repositories.Implementations
 
         public ServiceResult<IQueryable<BookAuthorPOCO>> GetAllBookAuthors()
         {
-            return new ServiceResult<IQueryable<BookAuthorPOCO>>(result: dbContext.BookAuthors);
+            var result = dbContext.BookAuthors;
+            var books = dbContext.Books.ToList();
+            var authors = dbContext.Authors.ToList();
+            foreach(var bookauthor in result)
+            {
+                bookauthor.Book = books.Where(x => x.Id == bookauthor.BookId).FirstOrDefault();
+                bookauthor.Author = authors.Where(x => x.Id == bookauthor.AuthorId).FirstOrDefault();
+            }
+            return new ServiceResult<IQueryable<BookAuthorPOCO>>(result);
         }
 
         public ServiceResult<AuthorPOCO> GetAuthorOfBook(Guid bookId)
@@ -50,7 +58,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
             }
             else
             {
-                return new ServiceResult<AuthorPOCO>(result: bookAuthor.Author);
+                return new ServiceResult<AuthorPOCO>(bookAuthor.Author);
             }
         }
 
@@ -63,7 +71,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
                 return ServiceResult<AuthorPOCO>.GetResourceNotFoundResult();
             }
 
-            return new ServiceResult<AuthorPOCO>(result: author);
+            return new ServiceResult<AuthorPOCO>(author);
         }
 
 
