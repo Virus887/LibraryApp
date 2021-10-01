@@ -86,8 +86,10 @@ namespace LibraryAPI.Services.Implementations
             var statusHistoryResponse = bookRepository.GetStatusHistoryByBookId(bookId);
             if (!statusHistoryResponse.IsOk()) return new ServiceResult<IEnumerable<BookStatus>>(null, statusHistoryResponse.Code, statusHistoryResponse.Message);
 
+            var statusHistory = statusHistoryResponse.Result.OrderBy(x => x.ModifiedDate);
+
             var statuses = new List<BookStatus>();
-            foreach(var status in statusHistoryResponse.Result.OrderBy(x => x.ModifiedDate))
+            foreach(var status in statusHistory)
             {
                 statuses.Add(
                     new BookStatus
@@ -104,31 +106,34 @@ namespace LibraryAPI.Services.Implementations
 
         public ServiceResult<BookDetails> GetBookDetails(Guid bookId)
         {
-            var price = bookPriceProvider.GetBookPrice(bookId).Result;
-            var bookPoco = bookRepository.GetById(bookId);
-            var authorPoco = authorRepository.GetAuthorOfBook(bookId);
-            var currentStatus = bookRepository.GetBookCurrentStatus(bookId);
+            var bookResponse = bookRepository.GetById(bookId);
+            if(!bookResponse.IsOk()) return new ServiceResult<BookDetails>(null, bookResponse.Code, bookResponse.Message);
 
-            if(!bookPoco.IsOk()) return new ServiceResult<BookDetails>(null, bookPoco.Code, bookPoco.Message);
+            var book = bookResponse.Result;
+           
+            var status = bookRepository.GetBookCurrentStatus(bookId).Result;
+            double? price = bookPriceProvider.GetBookPrice(bookId).Result;
 
             BookDetails bookDetails = new BookDetails
             {
                 Id = bookId,
-                PublicationDate = bookPoco.Result.PublicationDate ?? DateTime.MinValue,
-                Title = bookPoco.Result.Title,
-                Genre = Enum.Parse<BookGenres>(bookPoco.Result.Genre),
-                Language = bookPoco.Result.Language,
-                IsPolish = (bookPoco.Result.Language == "Polski" || bookPoco.Result.Language == "polski"),
-                CurrentStatus = currentStatus.Result,
+                PublicationDate = book.PublicationDate ?? DateTime.MinValue,
+                Title = book.Title,
+                Genre = Enum.Parse<BookGenres>(book.Genre),
+                Language = book.Language,
+                IsPolish = (book.Language == "Polski" || book.Language == "polski"),
+                CurrentStatus = status,
                 CurrentPrice = price ?? -1.0
             };
 
-            if(authorPoco.IsOk())
+            // Add author if exist
+            var authorResponse = authorRepository.GetAuthorOfBook(bookId);
+            if (authorResponse.IsOk())
             {
                 bookDetails.Author = new Author
                 {
-                    Name = authorPoco.Result.FirstName + " " + authorPoco.Result.LastName,
-                    DateOfBirth = authorPoco.Result.DateOfBirth ?? DateTime.MinValue
+                    Name = authorResponse.Result.FirstName + " " + authorResponse.Result.LastName,
+                    DateOfBirth = authorResponse.Result.DateOfBirth ?? DateTime.MinValue
                 };
             }
 
@@ -148,10 +153,8 @@ namespace LibraryAPI.Services.Implementations
                 PageNumber = null,
                 Genre = insertBookDto.Genre.ToString() ?? null
             };
-
             var newBookResponse = await bookRepository.InsertBook(newBook);
             if (!newBookResponse.IsOk()) return new ServiceResult<Guid>(new Guid(), newBookResponse.Code, newBookResponse.Message);
-
 
             // Assign new status to book
             StatusHistoryPOCO newStatusHistory = new StatusHistoryPOCO
@@ -160,7 +163,6 @@ namespace LibraryAPI.Services.Implementations
                 Status = "InStock",
                 ModifiedDate = newBook.PublicationDate ?? DateTime.MinValue,
             };
-
             var newBookStatusResponse = await bookRepository.InsertBookStatus(newStatusHistory);
             if (!newBookStatusResponse.IsOk()) return new ServiceResult<Guid>(new Guid(), newBookStatusResponse.Code, newBookStatusResponse.Message);
             newBook.CurrentStatusId = newBookStatusResponse.Result.Id;
