@@ -20,7 +20,7 @@ namespace LibraryAPI.Database.Repositories.Implementations
 
         public ServiceResult<IQueryable<BookPOCO>> GetAll()
         {
-            return new ServiceResult<IQueryable<BookPOCO>>(result: dbContext.Books);
+            return new ServiceResult<IQueryable<BookPOCO>>(dbContext.Books);
         }
 
         public ServiceResult<BookPOCO> GetById(Guid bookId)
